@@ -4,6 +4,7 @@ import { marked } from "marked";
 import { STATUS_TEXT } from "./statusCodes";
 import { INDEX_MARKDOWN } from "./content";
 import { renderPage } from "./template";
+import { clamp } from "./utils";
 
 const app = new Hono();
 
@@ -14,12 +15,6 @@ const app = new Hono();
 //  - 204/205/304 are "null body" statuses and reject any response body
 const NULL_BODY_STATUSES = new Set([204, 205, 304]);
 const INFORMATIONAL_STATUSES = new Set([100, 101, 102, 103]);
-
-function clamp(value: number, minimum: number, maximum: number): number {
-  if (value < minimum) return minimum;
-  if (value > maximum) return maximum;
-  return value;
-}
 
 app.use("*", logger());
 
