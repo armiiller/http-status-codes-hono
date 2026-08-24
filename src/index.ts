@@ -35,6 +35,45 @@ app.get("/", async (c) => {
 
 app.on("HEAD", "/", (c) => c.body(null, 200));
 
+app.all("/echo", async (c) => {
+  const url = new URL(c.req.url);
+
+  const headers: Record<string, string> = {};
+  c.req.raw.headers.forEach((value, key) => {
+    headers[key] = value;
+  });
+
+  const query: Record<string, string> = {};
+  url.searchParams.forEach((value, key) => {
+    query[key] = value;
+  });
+
+  let body: unknown = null;
+  if (c.req.method !== "GET" && c.req.method !== "HEAD") {
+    const rawBody = await c.req.text();
+    if (rawBody) {
+      const contentType = c.req.header("content-type") ?? "";
+      if (contentType.includes("application/json")) {
+        try {
+          body = JSON.parse(rawBody);
+        } catch {
+          body = rawBody;
+        }
+      } else {
+        body = rawBody;
+      }
+    }
+  }
+
+  return c.json({
+    method: c.req.method,
+    path: url.pathname,
+    query,
+    headers,
+    body,
+  });
+});
+
 app.all("/:code{[0-9]+}", async (c) => {
   const sleepParam = c.req.query("sleep");
   if (sleepParam !== undefined) {

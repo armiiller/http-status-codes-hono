@@ -7,6 +7,8 @@ Just add the status code you want to the end of the URL, like this: [https://sta
 
 If you want to delay a response add the query parameter **sleep** and specify the duration in milliseconds (maximum: 5000). Example: [https://statuscode.app/200?sleep=5000](https://statuscode.app/200?sleep=5000)
 
+Need to inspect a request instead? [/echo](/echo) accepts any method and returns a JSON summary of what it received: method, path, query params, headers, and body.
+
 ---
 | Code | Category | Description |
 | ---- | -------- | ----------- |
