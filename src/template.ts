@@ -1,0 +1,20 @@
+export function renderPage(title: string, contentHtml: string): string {
+  return `<html>
+  <head>
+    <title>${title}</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/app.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown-light.min.css" integrity="sha512-bm684OXnsiNuQSyrxuuwo4PHqr3OzxPpXyhT66DA/fhl73e1JmBxRKGnO/nRwWvOZxJLRCmNH7FII+Yn1JNPmg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  </head>
+  <body class="mx-auto max-w-4xl p-4">
+
+    <div class="">
+      <div class="markdown-body">
+        ${contentHtml}
+      </div>
+    </div>
+
+  </body>
+</html>`;
+}
