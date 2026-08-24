@@ -1,7 +1,17 @@
 {
   "name": "http-status-codes-hono",
   "version": "1.0.0",
+  "description": "A service for generating arbitrary HTTP status code responses, useful for testing monitoring services, webhook handlers, and error-handling code paths. Runs on Cloudflare Workers via Hono.",
   "private": true,
+  "license": "UNLICENSED",
+  "author": {
+    "name": "Austin Miller",
+    "url": "https://austinmiller.dev"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/armiiller/http-status-codes-hono.git"
+  },
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
