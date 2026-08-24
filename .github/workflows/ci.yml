@@ -2,59 +2,74 @@ name: CI
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
-    name: Type-check & test
+    name: Typecheck & test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node
+        uses: actions/setup-node@v7
         with:
-          node-version-file: .nvmrc
+          node-version-file: .node-version
           cache: npm
 
-      - run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Type-check
-        run: |
-          npx tsc --noEmit -p .
-          npx tsc --noEmit -p test/tsconfig.json
+      - name: Typecheck
+        run: npm run typecheck
 
       - name: Test
         run: npm test
 
   deploy:
-    name: Deploy
+    name: Deploy to Cloudflare Workers
     needs: test
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node
+        uses: actions/setup-node@v7
         with:
-          node-version-file: .nvmrc
+          node-version-file: .node-version
           cache: npm
 
-      - run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
       - name: Build CSS
         run: npm run css
 
-      - name: Deploy to Cloudflare Workers
+      # Runs `wrangler deploy` using the wrangler version already installed
+      # via `npm ci` above, so CI deploys with the exact version tests ran
+      # against. Requires the CLOUDFLARE_API_TOKEN repo secret (and
+      # CLOUDFLARE_ACCOUNT_ID if the token can access more than one account).
+      - name: Deploy
         uses: cloudflare/wrangler-action@v4
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy
 
+      # Tells IndexNow-participating search engines (Bing, Yandex, and
+      # others - not Google, which doesn't support IndexNow) to recrawl the
+      # site now instead of waiting for their own schedule. The key/domain
+      # come straight from wrangler.jsonc so there's nothing to keep in sync
+      # here; the Worker itself serves /<key>.txt for ownership verification
+      # (see public/). No account or signup needed - this is a no-op if the
+      # search engines don't recognize the key yet.
       - name: Ping IndexNow
         continue-on-error: true
         run: |
