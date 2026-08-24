@@ -8,7 +8,10 @@ describe("GET /", () => {
     expect(response.headers.get("content-type")).toContain("text/html");
 
     const html = await response.text();
-    expect(html).toContain("<title>statuscode.app</title>");
+    expect(html).toContain("<title>statuscode.app — HTTP Status Code Generator</title>");
+    expect(html).toContain('<meta name="description"');
+    expect(html).toContain('<link rel="canonical" href="https://statuscode.app/" />');
+    expect(html).toContain('<meta property="og:title" content="statuscode.app — HTTP Status Code Generator">');
     expect(html).toContain("markdown-body");
     expect(html).toContain('<a href="/200">200</a>');
     expect(html).toContain('<a href="/echo">/echo</a>');

@@ -1,0 +1,15 @@
+# HTTP Status Codes
+
+> A service for generating arbitrary HTTP status code responses, useful for testing monitoring services, webhook handlers, and error-handling code paths.
+
+Running on Cloudflare Workers via [Hono](https://hono.dev). Source: https://github.com/armiiller/http-status-codes-hono
+
+## Endpoints
+
+- [/{code}](https://statuscode.app/200): Any HTTP method to `/{code}` (e.g. `/200`, `/404`, `/503`) returns a response with that status and its standard reason phrase as the body. Supported codes: 100–511, see the full list at https://statuscode.app/. Add `?sleep={ms}` (0–5000) to delay the response by that many milliseconds before it's sent.
+- [/echo](https://statuscode.app/echo): Any HTTP method returns a JSON summary of the request received — method, path, query params, headers, and body (JSON-parsed if `content-type: application/json`, otherwise raw text).
+
+## Notes
+
+- Two status code groups can't be emitted exactly per the underlying HTTP semantics due to a Cloudflare Workers/Fetch API platform constraint: `/100`, `/101`, `/102`, `/103` return `501 Not Implemented` with an explanatory body instead of a final 1xx status; `/204`, `/205`, `/304` return the correct status with an empty body instead of the reason phrase text. Every other code behaves exactly as documented.
+- No request data is captured or stored by this service.

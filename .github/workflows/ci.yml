@@ -27,3 +27,37 @@ jobs:
 
       - name: Test
         run: npm test
+
+  deploy:
+    name: Deploy
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build CSS
+        run: npm run css
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy
+
+      - name: Ping IndexNow
+        continue-on-error: true
+        run: |
+          KEY=$(jq -r '.vars.INDEXNOW_KEY' wrangler.jsonc)
+          DOMAIN=$(jq -r '.routes[0].pattern' wrangler.jsonc)
+          curl -fsS "https://api.indexnow.org/indexnow?url=https://${DOMAIN}/&key=${KEY}"

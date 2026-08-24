@@ -6,6 +6,12 @@
   "observability": {
     "enabled": true
   },
+  "routes": [
+    { "pattern": "statuscode.app", "custom_domain": true }
+  ],
+  "vars": {
+    "INDEXNOW_KEY": "0c37b9c2b05a5ff86d5848d7e49a88b5"
+  },
   "assets": {
     "directory": "./public",
     "not_found_handling": "none"

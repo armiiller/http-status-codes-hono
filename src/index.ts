@@ -23,9 +23,13 @@ app.onError((err, c) => {
   return c.text("Internal Server Error", 500);
 });
 
+const INDEX_TITLE = "statuscode.app — HTTP Status Code Generator";
+const INDEX_DESCRIPTION =
+  "Generate any HTTP status code (100–511) on demand for testing monitoring services, webhooks, and error handling. Delay responses with ?sleep, or inspect requests with /echo.";
+
 app.get("/", async (c) => {
   const contentHtml = await marked.parse(INDEX_MARKDOWN);
-  return c.html(renderPage("statuscode.app", contentHtml));
+  return c.html(renderPage(INDEX_TITLE, INDEX_DESCRIPTION, contentHtml));
 });
 
 app.on("HEAD", "/", (c) => c.body(null, 200));
