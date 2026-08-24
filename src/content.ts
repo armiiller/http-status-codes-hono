@@ -9,6 +9,8 @@ If you want to delay a response add the query parameter **sleep** and specify th
 
 Need to inspect a request instead? [/echo](/echo) accepts any method and returns a JSON summary of what it received: method, path, query params, headers, and body.
 
+Just want your IP? [/ip](/ip) accepts any method and returns your connecting IP address as plain text, read from the **CF-Connecting-IP** header Cloudflare sets on every request.
+
 ---
 | Code | Category | Description |
 | ---- | -------- | ----------- |

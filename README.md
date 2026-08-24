@@ -12,6 +12,7 @@ This is a Cloudflare Workers port of [armiiller/http-status-codes](https://githu
 - `?sleep=<ms>` — delays the response by `ms` milliseconds, clamped to `[0, 5000]`.
 - `GET /` — renders the supported status code list.
 - `ANY /echo` — returns a JSON summary of the request it received: method, path, query params, headers, and body (JSON-parsed if `content-type: application/json`, else raw text).
+- `ANY /ip` — returns the connecting client's IP as plain text, read from the `CF-Connecting-IP` header Cloudflare sets on every request. Returns `500` if that header is missing.
 
 ## Development
 
@@ -27,7 +28,7 @@ npm run dev      # wrangler dev
 npm test
 ```
 
-Runs the Vitest suite against the actual Worker code inside the Workers runtime (via `@cloudflare/vitest-plugin`), covering every supported status code, the platform-limitation edge cases below, `/echo`, the `sleep` param, and the index page. Static asset routes (`/app.css`, `/favicon.ico`, `/robots.txt`) aren't covered here since they're served by the Workers Static Assets platform layer in front of the Worker script, not by any code in this repo — they're verified manually via `wrangler dev`.
+Runs the Vitest suite against the actual Worker code inside the Workers runtime (via `@cloudflare/vitest-plugin`), covering every supported status code, the platform-limitation edge cases below, `/echo`, `/ip`, the `sleep` param, and the index page. Static asset routes (`/app.css`, `/favicon.ico`, `/robots.txt`) aren't covered here since they're served by the Workers Static Assets platform layer in front of the Worker script, not by any code in this repo — they're verified manually via `wrangler dev`.
 
 ## Deploy
 

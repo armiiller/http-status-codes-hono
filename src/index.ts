@@ -73,6 +73,14 @@ app.all("/echo", async (c) => {
   });
 });
 
+app.all("/ip", (c) => {
+  const ip = c.req.header("cf-connecting-ip");
+  if (!ip) {
+    return c.text("cf-connecting-ip header not present", 500);
+  }
+  return c.text(ip);
+});
+
 app.all("/:code{[0-9]+}", async (c) => {
   const sleepParam = c.req.query("sleep");
   if (sleepParam !== undefined) {

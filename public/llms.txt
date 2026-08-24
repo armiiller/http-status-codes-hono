@@ -8,6 +8,7 @@ Running on Cloudflare Workers via [Hono](https://hono.dev). Source: https://gith
 
 - [/{code}](https://statuscode.app/200): Any HTTP method to `/{code}` (e.g. `/200`, `/404`, `/503`) returns a response with that status and its standard reason phrase as the body. Supported codes: 100–511, see the full list at https://statuscode.app/. Add `?sleep={ms}` (0–5000) to delay the response by that many milliseconds before it's sent.
 - [/echo](https://statuscode.app/echo): Any HTTP method returns a JSON summary of the request received — method, path, query params, headers, and body (JSON-parsed if `content-type: application/json`, otherwise raw text).
+- [/ip](https://statuscode.app/ip): Any HTTP method returns the connecting client's IP address as plain text, read from the `CF-Connecting-IP` header Cloudflare sets on every request. Returns `500` if that header is somehow missing.
 
 ## Notes
 
