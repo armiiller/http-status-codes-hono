@@ -1,22 +1,24 @@
-export const INDEX_MARKDOWN = `# HTTP Status Codes 🤠
+import { INFORMATIONAL_STATUSES, NULL_BODY_STATUSES, STATUS_TEXT, SUPPORTED_STATUS_CODES } from "./statusCodes";
+
+const INTRO = `# HTTP Status Codes 🤠
 A service for generating HTTP codes.
 
 It's useful for testing monitoring services.
 
 Just add the status code you want to the end of the URL, like this: [https://statuscode.app/200](https://statuscode.app/200)
 
-If you want to delay a response add the query parameter **sleep** and specify the duration in milliseconds (maximum: 5000). Example: [https://statuscode.app/200?sleep=5000](https://statuscode.app/200?sleep=5000)
+If you want to delay a response add the query parameter **sleep** and specify the duration in milliseconds (maximum: 5000). Example: [https://statuscode.app/200?sleep=5000](https://statuscode.app/200?sleep=5000)`;
 
-## Extra Endpoints
+const EXTRA_ENDPOINTS = `## Extra Endpoints
 Beyond status codes, a few other routes are useful for testing:
 
 | Path | Description |
 | ---- | ----------- |
 | [/echo](/echo) | Accepts any method and returns a JSON summary of what it received: method, path, query params, headers, and body. |
 | [/ip](/ip) | Accepts any method and returns your connecting IP address as plain text, read from the **CF-Connecting-IP** header Cloudflare sets on every request. |
-| [/download](/download) | Returns a dummy file as an attachment for testing download handling. Customize with query params: **filename** (default \`download.txt\`), **size** in bytes (default 1024, max 10 MiB), and **type** for the Content-Type header (default \`application/octet-stream\`). Example: [/download?filename=report.csv&size=2048&type=text/csv](/download?filename=report.csv&size=2048&type=text/csv) |
+| [/download](/download) | Returns a dummy file as an attachment for testing download handling. Customize with query params: **filename** (default \`download.txt\`), **size** in bytes (default 1024, max 10 MiB), and **type** for the Content-Type header (default \`application/octet-stream\`). Example: [/download?filename=report.csv&size=2048&type=text/csv](/download?filename=report.csv&size=2048&type=text/csv) |`;
 
----
+const STATUS_CATEGORIES = `---
 | Code | Category | Description |
 | ---- | -------- | ----------- |
 | 1xx | Informational | Request received, continuing process |
@@ -27,86 +29,47 @@ Beyond status codes, a few other routes are useful for testing:
 
 Please see the [IANA website](https://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml) for all available codes and details.
 
----
+---`;
 
-## Supported Status Codes
-| Code | Description | Notes |
-| ---- | ----------- | ----- |
-| [100](/100) | Continue | Returns 501 instead — see note below |
-| [101](/101) | Switching Protocols | Returns 501 instead — see note below |
-| [102](/102) | Processing | Returns 501 instead — see note below |
-| [103](/103) | Early Hints | Returns 501 instead — see note below |
-| [200](/200) | OK | |
-| [201](/201) | Created | |
-| [202](/202) | Accepted | |
-| [203](/203) | Non-Authoritative Information | |
-| [204](/204) | No Content | Empty body — see note below |
-| [205](/205) | Reset Content | Empty body — see note below |
-| [206](/206) | Partial Content | |
-| [207](/207) | Multi-Status | |
-| [208](/208) | Already Reported | |
-| [226](/226) | IM Used | |
-| [300](/300) | Multiple Choices | |
-| [301](/301) | Moved Permanently | |
-| [302](/302) | Found | |
-| [303](/303) | See Other | |
-| [304](/304) | Not Modified | Empty body — see note below |
-| [305](/305) | Use Proxy | |
-| [306](/306) | Switch Proxy | |
-| [307](/307) | Temporary Redirect | |
-| [308](/308) | Permanent Redirect | |
-| [400](/400) | Bad Request | |
-| [401](/401) | Unauthorized | |
-| [402](/402) | Payment Required | |
-| [403](/403) | Forbidden | |
-| [404](/404) | Not Found | |
-| [405](/405) | Method Not Allowed | |
-| [406](/406) | Not Acceptable | |
-| [407](/407) | Proxy Authentication Required | |
-| [408](/408) | Request Timeout | |
-| [409](/409) | Conflict | |
-| [410](/410) | Gone | |
-| [411](/411) | Length Required | |
-| [412](/412) | Precondition Failed | |
-| [413](/413) | Request Entity Too Large | |
-| [414](/414) | Request-URL Too Long | |
-| [415](/415) | Unsupported Media Type | |
-| [416](/416) | Requested Range Not Satisfiable | |
-| [417](/417) | Expectation Failed | |
-| [418](/418) | I'm a teapot | |
-| [421](/421) | Misdirected Request | |
-| [422](/422) | Unprocessable Entity | |
-| [423](/423) | Locked | |
-| [424](/424) | Failed Dependency | |
-| [425](/425) | Too Early | |
-| [426](/426) | Upgrade Required | |
-| [428](/428) | Precondition Required | |
-| [429](/429) | Too Many Requests | |
-| [431](/431) | Request Header Fields Too Large | |
-| [451](/451) | Unavailable For Legal Reasons | |
-| [500](/500) | Internal Server Error | |
-| [501](/501) | Not Implemented | |
-| [502](/502) | Bad Gateway | |
-| [503](/503) | Service Unavailable | |
-| [504](/504) | Gateway Timeout | |
-| [505](/505) | HTTP Version Not Supported | |
-| [506](/506) | Variant Also Negotiates | |
-| [507](/507) | Insufficient Storage | |
-| [508](/508) | Loop Detected | |
-| [510](/510) | Not Extended | |
-| [511](/511) | Network Authentication Required | |
+// STATUS_TEXT holds the exact reason phrase this service serves in the
+// response body, which is intentionally blank for 306 (see statusCodes.ts).
+// This override just gives 306 a human-readable name in the docs table.
+const STATUS_DESCRIPTION_OVERRIDES: Record<number, string> = {
+  306: "Switch Proxy",
+};
 
-### Platform limitations
+function describeStatus(code: number): string {
+  return STATUS_DESCRIPTION_OVERRIDES[code] ?? STATUS_TEXT[code];
+}
+
+function noteForStatus(code: number): string {
+  if (INFORMATIONAL_STATUSES.has(code)) return "Returns 501 instead — see note below";
+  if (NULL_BODY_STATUSES.has(code)) return "Empty body — see note below";
+  return "";
+}
+
+function buildStatusCodeTable(): string {
+  const rows = SUPPORTED_STATUS_CODES.map(
+    (code) => `| [${code}](/${code}) | ${describeStatus(code)} | ${noteForStatus(code)} |`
+  );
+  return ["## Supported Status Codes", "| Code | Description | Notes |", "| ---- | ----------- | ----- |", ...rows].join(
+    "\n"
+  );
+}
+
+const PLATFORM_LIMITATIONS = `### Platform limitations
 
 This service runs on Cloudflare Workers, which implements the Fetch API's \`Response\` object rules. Two groups of codes can't be emitted exactly as specced because of that:
 
 1. **100, 101, 102, 103** — the Fetch API forbids constructing a \`Response\` with a status below 200 at all, so a final 1xx status can't be sent. These routes return \`501 Not Implemented\` with an explanatory body instead.
 2. **204, 205, 304** — the Fetch API forbids a body on these "null body" statuses. These routes return the correct status code with an empty body instead of the reason phrase text.
 
-Every other code behaves exactly as documented above, including \`306\`, which has no defined reason phrase (matching Go's \`net/http.StatusText\`) and returns an empty body by design.
+Every other code behaves exactly as documented above, including \`306\`, which has no defined reason phrase (matching Go's \`net/http.StatusText\`) and returns an empty body by design.`;
 
----
+const FOOTER = `---
 Created by [Austin Miller](https://austinmiller.dev), Hosted on [Cloudflare Workers](https://workers.cloudflare.com), Open Sourced on [Github](https://github.com/armiiller/http-status-codes-hono).
 
-We don't capture or store any data about the requests you make.
-`;
+We don't capture or store any data about the requests you make.`;
+
+export const INDEX_MARKDOWN =
+  [INTRO, EXTRA_ENDPOINTS, STATUS_CATEGORIES, buildStatusCodeTable(), PLATFORM_LIMITATIONS, FOOTER].join("\n\n") + "\n";

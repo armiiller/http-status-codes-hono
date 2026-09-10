@@ -1,20 +1,12 @@
 import { Hono } from "hono";
 import { logger } from "hono/logger";
 import { marked } from "marked";
-import { STATUS_TEXT } from "./statusCodes";
+import { INFORMATIONAL_STATUSES, NULL_BODY_STATUSES, STATUS_TEXT } from "./statusCodes";
 import { INDEX_MARKDOWN } from "./content";
 import { renderPage } from "./template";
 import { clamp, sanitizeFilename } from "./utils";
 
 const app = new Hono();
-
-// The Fetch API's Response constructor enforces two restrictions the
-// original Go/Gin service didn't have to worry about, so these codes need
-// special-cased handling below:
-//  - status must be in [200, 599], so a final 1xx status can't be sent at all
-//  - 204/205/304 are "null body" statuses and reject any response body
-const NULL_BODY_STATUSES = new Set([204, 205, 304]);
-const INFORMATIONAL_STATUSES = new Set([100, 101, 102, 103]);
 
 app.use("*", logger());
 

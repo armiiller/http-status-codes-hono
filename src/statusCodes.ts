@@ -68,3 +68,10 @@ export const STATUS_TEXT: Record<number, string> = {
 };
 
 export const SUPPORTED_STATUS_CODES = Object.keys(STATUS_TEXT).map(Number);
+
+// The Fetch API's Response constructor enforces two restrictions the
+// original Go/Gin service didn't have to worry about:
+//  - status must be in [200, 599], so a final 1xx status can't be sent at all
+//  - 204/205/304 are "null body" statuses and reject any response body
+export const INFORMATIONAL_STATUSES = new Set([100, 101, 102, 103]);
+export const NULL_BODY_STATUSES = new Set([204, 205, 304]);
