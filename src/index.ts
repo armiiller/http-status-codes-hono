@@ -4,7 +4,7 @@ import { marked } from "marked";
 import { STATUS_TEXT } from "./statusCodes";
 import { INDEX_MARKDOWN } from "./content";
 import { renderPage } from "./template";
-import { clamp } from "./utils";
+import { clamp, sanitizeFilename } from "./utils";
 
 const app = new Hono();
 
@@ -25,7 +25,7 @@ app.onError((err, c) => {
 
 const INDEX_TITLE = "statuscode.app — HTTP Status Code Generator";
 const INDEX_DESCRIPTION =
-  "Generate any HTTP status code (100–511) on demand for testing monitoring services, webhooks, and error handling. Delay responses with ?sleep, or inspect requests with /echo.";
+  "Generate any HTTP status code (100–511) on demand for testing monitoring services, webhooks, and error handling. Delay responses with ?sleep, inspect requests with /echo, or stub a file download with /download.";
 
 app.get("/", async (c) => {
   const contentHtml = await marked.parse(INDEX_MARKDOWN);
@@ -71,6 +71,36 @@ app.all("/echo", async (c) => {
     headers,
     body,
   });
+});
+
+const DEFAULT_DOWNLOAD_FILENAME = "download.txt";
+const DEFAULT_DOWNLOAD_SIZE = 1024;
+const MAX_DOWNLOAD_SIZE = 10 * 1024 * 1024; // 10 MiB
+const DEFAULT_DOWNLOAD_CONTENT_TYPE = "application/octet-stream";
+const DOWNLOAD_FILLER = "0123456789abcdef";
+
+app.all("/download", (c) => {
+  const filename = sanitizeFilename(c.req.query("filename") ?? DEFAULT_DOWNLOAD_FILENAME);
+  const contentType = c.req.query("type") ?? DEFAULT_DOWNLOAD_CONTENT_TYPE;
+
+  let size = DEFAULT_DOWNLOAD_SIZE;
+  const sizeParam = c.req.query("size");
+  if (sizeParam !== undefined) {
+    const parsedSize = Number.parseInt(sizeParam, 10);
+    if (Number.isNaN(parsedSize)) {
+      throw new Error(`invalid size value: ${sizeParam}`);
+    }
+    size = clamp(parsedSize, 0, MAX_DOWNLOAD_SIZE);
+  }
+
+  const body = new Uint8Array(size);
+  for (let i = 0; i < size; i++) {
+    body[i] = DOWNLOAD_FILLER.charCodeAt(i % DOWNLOAD_FILLER.length);
+  }
+
+  c.header("Content-Type", contentType);
+  c.header("Content-Disposition", `attachment; filename="${filename}"`);
+  return c.body(body, 200);
 });
 
 app.all("/ip", (c) => {

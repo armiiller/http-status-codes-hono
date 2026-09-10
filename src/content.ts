@@ -7,9 +7,14 @@ Just add the status code you want to the end of the URL, like this: [https://sta
 
 If you want to delay a response add the query parameter **sleep** and specify the duration in milliseconds (maximum: 5000). Example: [https://statuscode.app/200?sleep=5000](https://statuscode.app/200?sleep=5000)
 
-Need to inspect a request instead? [/echo](/echo) accepts any method and returns a JSON summary of what it received: method, path, query params, headers, and body.
+## Extra Endpoints
+Beyond status codes, a few other routes are useful for testing:
 
-Just want your IP? [/ip](/ip) accepts any method and returns your connecting IP address as plain text, read from the **CF-Connecting-IP** header Cloudflare sets on every request.
+| Path | Description |
+| ---- | ----------- |
+| [/echo](/echo) | Accepts any method and returns a JSON summary of what it received: method, path, query params, headers, and body. |
+| [/ip](/ip) | Accepts any method and returns your connecting IP address as plain text, read from the **CF-Connecting-IP** header Cloudflare sets on every request. |
+| [/download](/download) | Returns a dummy file as an attachment for testing download handling. Customize with query params: **filename** (default \`download.txt\`), **size** in bytes (default 1024, max 10 MiB), and **type** for the Content-Type header (default \`application/octet-stream\`). Example: [/download?filename=report.csv&size=2048&type=text/csv](/download?filename=report.csv&size=2048&type=text/csv) |
 
 ---
 | Code | Category | Description |
