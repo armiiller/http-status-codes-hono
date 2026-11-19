@@ -1,8 +1,6 @@
 import { Hono } from "hono";
 import { logger } from "hono/logger";
-import { marked } from "marked";
 import { INFORMATIONAL_STATUSES, NULL_BODY_STATUSES, STATUS_TEXT } from "./statusCodes";
-import { INDEX_MARKDOWN } from "./content";
 import { renderPage } from "./template";
 import { clamp, sanitizeFilename } from "./utils";
 
@@ -19,10 +17,7 @@ const INDEX_TITLE = "statuscode.app — HTTP Status Code Generator";
 const INDEX_DESCRIPTION =
   "Generate any HTTP status code (100–511) on demand for testing monitoring services, webhooks, and error handling. Delay responses with ?sleep, inspect requests with /echo, or stub a file download with /download.";
 
-app.get("/", async (c) => {
-  const contentHtml = await marked.parse(INDEX_MARKDOWN);
-  return c.html(renderPage(INDEX_TITLE, INDEX_DESCRIPTION, contentHtml));
-});
+app.get("/", (c) => c.html(renderPage(INDEX_TITLE, INDEX_DESCRIPTION)));
 
 app.on("HEAD", "/", (c) => c.body(null, 200));
 

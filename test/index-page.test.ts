@@ -1,5 +1,6 @@
 import { SELF } from "cloudflare:test";
 import { describe, expect, it } from "vitest";
+import { SUPPORTED_STATUS_CODES } from "../src/statusCodes";
 
 describe("GET /", () => {
   it("renders the index page as HTML", async () => {
@@ -12,9 +13,18 @@ describe("GET /", () => {
     expect(html).toContain('<meta name="description"');
     expect(html).toContain('<link rel="canonical" href="https://statuscode.app/" />');
     expect(html).toContain('<meta property="og:title" content="statuscode.app — HTTP Status Code Generator">');
-    expect(html).toContain("markdown-body");
-    expect(html).toContain('<a href="/200">200</a>');
-    expect(html).toContain('<a href="/echo">/echo</a>');
+    expect(html).toContain('id="tester"');
+    expect(html).toContain('<a class="code-num c2" href="/200">200</a>');
+    expect(html).toContain('<a class="code-num c4" href="/404">404</a>');
+    expect(html).toContain('<a href="/echo">');
+    expect(html).toContain('href="/download?filename=report.csv');
+  });
+
+  it("lists every supported status code with a link", async () => {
+    const html = await (await SELF.fetch("https://example.com/")).text();
+    for (const code of SUPPORTED_STATUS_CODES) {
+      expect(html).toContain(`href="/${code}">${code}</a>`);
+    }
   });
 });
 
